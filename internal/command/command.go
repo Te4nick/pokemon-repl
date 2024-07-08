@@ -19,12 +19,13 @@ var exitCommand Command = Command{
 	Callback:    callbacks.ExitCallback,
 }
 
-//var helpCommand Command = Command {
-//	name: names.HELP_NAME,
-//	description: descriptions.HELP_DESCRIPTION,
-//	callback: callbacks.
-//}
+var helpCommand Command = Command{
+	Name:        names.HELP_NAME,
+	description: descriptions.HELP_DESCRIPTION,
+	Callback:    callbacks.HelpCallback,
+}
 
 var Commands map[string]Command = map[string]Command{
 	names.EXIT_NAME: exitCommand,
+	names.HELP_NAME: helpCommand,
 }

@@ -3,17 +3,20 @@ package application
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"github.com/chrxn1c/pokemon-repl/internal/command"
 	"github.com/chrxn1c/pokemon-repl/internal/user_context"
 	"github.com/chrxn1c/pokemon-repl/internal/user_context/pokemon"
+	"log"
+	"os"
 )
 
 type Application interface {
 	initializeComponents()
-	printWelcomeMessage(writer *bufio.Writer) error
+	printWelcomeMessage() error
 	takeCommand(scanner *bufio.Scanner) (command.Command, error)
 	evaluateCommand(cmd *command.Command) (string, error)
-	printResultOfCommand(result string, writer *bufio.Writer) error
+	printResultOfCommand(result string) error
 	Run() error
 }
 
@@ -28,15 +31,18 @@ func (app *PokemonApplication) initializeComponents() {
 	}
 }
 
-func (app *PokemonApplication) printWelcomeMessage(writer *bufio.Writer) error {
-	_, err := writer.WriteString("Welcome aboard! If you don't have a faintest idea of what to do, type in \"help\" command")
-	if err != nil {
-		return err
-	}
+func (app *PokemonApplication) printWelcomeMessage() error {
+	fmt.Println("Welcome aboard! If you don't have a faintest idea of what to do, type in \"help\" command")
 	return nil
 }
 
 func (app *PokemonApplication) takeCommand(scanner *bufio.Scanner) (command.Command, error) {
+	scanner.Scan()
+	err := scanner.Err()
+	if err != nil {
+		fmt.Println("Error occured while scanning user input")
+		log.Fatal(err)
+	}
 	stringCommandRepresentation := scanner.Text()
 
 	cmd, ok := command.Commands[stringCommandRepresentation]
@@ -56,33 +62,29 @@ func (app *PokemonApplication) evaluateCommand(cmd command.Command) (string, err
 	return outputData, nil
 }
 
-func (app *PokemonApplication) printResultOfCommand(result string, writer *bufio.Writer) error {
-	_, err := writer.WriteString(result)
-	if err != nil {
-		return err
-	}
+func (app *PokemonApplication) printResultOfCommand(result string) error {
+	fmt.Println(result)
 	return nil
 }
 
 func (app *PokemonApplication) Run() error {
 	app.initializeComponents()
-	scanner := bufio.Scanner{}
-	writer := bufio.Writer{}
+	scanner := bufio.NewScanner(os.Stdin)
 
-	err := app.printWelcomeMessage(&writer)
+	err := app.printWelcomeMessage()
 	if err != nil {
 		return err
 	}
 
 	for {
-		inferredCommand, err := app.takeCommand(&scanner)
+		inferredCommand, err := app.takeCommand(scanner)
 		if err != nil {
 			return err
 		}
 
 		outputData, err := app.evaluateCommand(inferredCommand)
 
-		err = app.printResultOfCommand(outputData, &writer)
+		err = app.printResultOfCommand(outputData)
 		if err != nil {
 			return err
 		}
