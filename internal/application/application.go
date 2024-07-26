@@ -17,6 +17,7 @@ type Application interface {
 	takeCommand(scanner *bufio.Scanner) (command.Command, error)
 	evaluateCommand(cmd *command.Command) (string, error)
 	printResultOfCommand(result string) error
+	unknownCommand()
 	Run() error
 }
 
@@ -40,7 +41,7 @@ func (app *PokemonApplication) takeCommand(scanner *bufio.Scanner) (command.Comm
 	scanner.Scan()
 	err := scanner.Err()
 	if err != nil {
-		fmt.Println("Error occured while scanning user input")
+		fmt.Println("Error occurred while scanning user input")
 		log.Fatal(err)
 	}
 	stringCommandRepresentation := scanner.Text()
@@ -67,6 +68,10 @@ func (app *PokemonApplication) printResultOfCommand(result string) error {
 	return nil
 }
 
+func (app *PokemonApplication) unknownCommand() {
+	fmt.Println("Given command is not supported. Use \"help\" if necessary.")
+}
+
 func (app *PokemonApplication) Run() error {
 	app.initializeComponents()
 	scanner := bufio.NewScanner(os.Stdin)
@@ -79,7 +84,8 @@ func (app *PokemonApplication) Run() error {
 	for {
 		inferredCommand, err := app.takeCommand(scanner)
 		if err != nil {
-			return err
+			app.unknownCommand()
+			continue
 		}
 
 		outputData, err := app.evaluateCommand(inferredCommand)
