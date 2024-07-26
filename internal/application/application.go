@@ -38,10 +38,11 @@ func (app *PokemonApplication) printWelcomeMessage() error {
 }
 
 func (app *PokemonApplication) takeCommand(scanner *bufio.Scanner) (command.Command, error) {
+	fmt.Print("pokedex:$ ")
 	scanner.Scan()
 	err := scanner.Err()
 	if err != nil {
-		fmt.Println("Error occurred while scanning user input")
+		fmt.Println("\nError occurred while scanning user input")
 		log.Fatal(err)
 	}
 	stringCommandRepresentation := scanner.Text()
