@@ -12,12 +12,6 @@ import (
 )
 
 type Application interface {
-	initializeComponents()
-	printWelcomeMessage() error
-	takeCommand(scanner *bufio.Scanner) (command.Command, error)
-	evaluateCommand(cmd *command.Command) (string, error)
-	printResultOfCommand(result string) error
-	unknownCommand()
 	Run() error
 }
 
