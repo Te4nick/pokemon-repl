@@ -44,7 +44,7 @@ func MapCallback(ctx *user_context.UserContext) (string, error) {
 		log.Fatalf("Failed to close body of response when have received $map command, user context: %v\nerr: %v\nURL: %v\n", ctx, err, currentURL)
 	}
 
-	if result.StatusCode > 400 && result.StatusCode <= 499 {
+	if result.StatusCode >= 400 {
 		log.Fatalf("Response of $map failed with status code: %d and\nbody: %s\n", result.StatusCode, body)
 	}
 
