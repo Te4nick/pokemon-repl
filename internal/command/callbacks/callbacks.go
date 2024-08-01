@@ -1,6 +1,7 @@
 package callbacks
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/chrxn1c/pokemon-repl/internal/user_context"
 	"io"
@@ -31,6 +32,7 @@ func HelpCallback(ctx *user_context.UserContext) (string, error) {
 func MapCallback(ctx *user_context.UserContext) (string, error) {
 	currentURL := fmt.Sprintf("https://pokeapi.co/api/v2/location?limit=20&offset=%d", ctx.APIoffset)
 	result, err := http.Get(currentURL)
+
 	if err != nil {
 		log.Fatalf("Failed to fetch response when doing $map command, user context: %v\nerr: %v\nURL: %v\n", ctx, err, currentURL)
 	}
@@ -51,8 +53,28 @@ func MapCallback(ctx *user_context.UserContext) (string, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%s", body)
 
 	ctx.APIoffset += 20
-	return string(body), nil
+
+	type MapResponse struct {
+		Count    int    `json:"-"`
+		Next     string `json:"-"`
+		Previous any    `json:"-"`
+		Results  []struct {
+			Name string `json:"name"`
+			URL  string `json:"-"`
+		} `json:"results"`
+	}
+
+	mapResponse := MapResponse{}
+	err = json.Unmarshal(body, &mapResponse)
+	if err != nil {
+		return "", err
+	}
+
+	toUserResponse := ""
+	for _, location := range mapResponse.Results {
+		toUserResponse += fmt.Sprintf("%v\n", location.Name)
+	}
+	return toUserResponse, nil
 }
