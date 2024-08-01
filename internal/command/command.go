@@ -31,8 +31,15 @@ var mapCommand Command = Command{
 	Callback:    callbacks.MapCallback,
 }
 
+var mapbCommand Command = Command{
+	Name:        names.MAPB_NAME,
+	description: descriptions.MAPB_DESCIPTION,
+	Callback:    callbacks.MapbCallback,
+}
+
 var Commands map[string]Command = map[string]Command{
 	names.EXIT_NAME: exitCommand,
 	names.HELP_NAME: helpCommand,
 	names.MAP_NAME:  mapCommand,
+	names.MAPB_NAME: mapbCommand,
 }

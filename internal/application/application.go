@@ -21,7 +21,7 @@ type PokemonApplication struct {
 
 func (app *PokemonApplication) initializeComponents() {
 	app.userContext = user_context.UserContext{
-		APIoffset:      0,
+		APIoffset:      -20, // $ map will increase offset by 20 first and then inspect the given offset
 		CaughtPokemons: []pokemon.Pokemon{},
 	}
 }
