@@ -16,8 +16,9 @@ type Cache struct {
 	destroyValueTimestamp time.Duration
 }
 
-func (cache *Cache) NewCache(destroyValueTimestamp time.Duration) {
+func NewCache(destroyValueTimestamp time.Duration) (cache *Cache) {
 	cache.destroyValueTimestamp = destroyValueTimestamp
+	return cache
 }
 
 func (cache *Cache) Add(key string, value []byte) {
