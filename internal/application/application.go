@@ -70,6 +70,7 @@ func (app *PokemonApplication) unknownCommand() {
 func (app *PokemonApplication) Run() error {
 	app.initializeComponents()
 	scanner := bufio.NewScanner(os.Stdin)
+
 	err := app.printWelcomeMessage()
 	if err != nil {
 		return err
