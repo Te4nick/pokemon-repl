@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/chrxn1c/pokemon-repl/internal/command"
+	"github.com/chrxn1c/pokemon-repl/internal/pokecache"
 	"github.com/chrxn1c/pokemon-repl/internal/user_context"
 	"github.com/chrxn1c/pokemon-repl/internal/user_context/pokemon"
 	"log"
 	"os"
+	"time"
 )
 
 type Application interface {
@@ -23,6 +25,7 @@ func (app *PokemonApplication) initializeComponents() {
 	app.userContext = user_context.UserContext{
 		APIoffset:      -20, // $ map will increase offset by 20 first and then inspect the given offset
 		CaughtPokemons: []pokemon.Pokemon{},
+		Cache:          pokecache.NewCache(5 * time.Minute),
 	}
 }
 

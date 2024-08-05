@@ -8,5 +8,5 @@ import (
 type UserContext struct {
 	CaughtPokemons []pokemon.Pokemon
 	APIoffset      int64
-	Cache          pokecache.Cache
+	Cache          *pokecache.Cache
 }

@@ -8,7 +8,17 @@ import (
 )
 
 func makeAPIRequestAndProcessErrors(ctx *user_context.UserContext, currentURL string) (body []byte, err error) {
+
+	cachedResponse, isCached := ctx.Cache.Get(currentURL)
+	if isCached {
+		return cachedResponse, nil
+	}
+
 	response, err := http.Get(currentURL)
+
+	if response.StatusCode >= 400 {
+		log.Fatalf("Response of $map failed with status code: %d\nbody: %s\n", response.StatusCode, body)
+	}
 
 	if err != nil {
 		log.Fatalf("Failed to fetch response when doing $map command, user context: %v\nerr: %v\nURL: %v\n", ctx, err, currentURL)
@@ -23,10 +33,7 @@ func makeAPIRequestAndProcessErrors(ctx *user_context.UserContext, currentURL st
 		log.Fatalf("Failed to close body of response when have received $map command, user context: %v\nerr: %v\nURL: %v\n", ctx, err, currentURL)
 	}
 
-	if response.StatusCode >= 400 {
-		log.Fatalf("Response of $map failed with status code: %d\nbody: %s\n", response.StatusCode, body)
-	}
-
+	ctx.Cache.Add(currentURL, body)
 	if err != nil {
 		log.Fatal(err)
 	}
