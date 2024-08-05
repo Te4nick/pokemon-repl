@@ -22,8 +22,8 @@ func HelpCallback(ctx *user_context.UserContext) (string, error) {
 	fmt.Println("\nFor now you can do the following:\n" +
 		"1) type \"help\" command \n" +
 		"2) type \"exit\" command \n" +
-		"3) type \"map\" command \n" +
-		"4) type \"mapb\" command")
+		"3) type \"map\" command to explore the next 20 locations\n" +
+		"4) type \"mapb\" command to explore the previous 20 locations")
 
 	return "", nil
 }
