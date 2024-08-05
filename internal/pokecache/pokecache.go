@@ -17,8 +17,11 @@ type Cache struct {
 }
 
 func NewCache(destroyValueTimestamp time.Duration) (cache *Cache) {
-	cache.destroyValueTimestamp = destroyValueTimestamp
-	return cache
+	return &Cache{
+		mutex:                 sync.Mutex{},
+		content:               map[string]cacheEntry{},
+		destroyValueTimestamp: destroyValueTimestamp,
+	}
 }
 
 func (cache *Cache) Add(key string, value []byte) {
