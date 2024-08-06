@@ -2,15 +2,16 @@ package application
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
+	"log"
+	"os"
+	"time"
+
 	"github.com/chrxn1c/pokemon-repl/internal/command"
 	"github.com/chrxn1c/pokemon-repl/internal/pokecache"
 	"github.com/chrxn1c/pokemon-repl/internal/user_context"
 	"github.com/chrxn1c/pokemon-repl/internal/user_context/pokemon"
-	"log"
-	"os"
-	"time"
+	"github.com/chrxn1c/pokemon-repl/internal/utils"
 )
 
 type Application interface {
@@ -18,15 +19,27 @@ type Application interface {
 }
 
 type PokemonApplication struct {
-	userContext user_context.UserContext
+	userContext    *user_context.UserContext
+	contentManager *utils.ContentManager
+	commander      *command.Commander
 }
 
-func (app *PokemonApplication) initializeComponents() {
-	app.userContext = user_context.UserContext{
+func (app *PokemonApplication) initializeComponents() error {
+	app.userContext = &user_context.UserContext{
 		APIoffset:      -20, // $ map will increase offset by 20 first and then inspect the given offset
 		CaughtPokemons: []pokemon.Pokemon{},
 		Cache:          pokecache.NewCache(5 * time.Second),
 	}
+
+	var err error
+	app.contentManager, err = utils.NewContentManager("en_EN")
+	if err != nil {
+		return err
+	}
+
+	app.commander = command.NewCommander(app.contentManager.Commands)
+
+	return nil
 }
 
 func (app *PokemonApplication) printWelcomeMessage() error {
@@ -34,31 +47,18 @@ func (app *PokemonApplication) printWelcomeMessage() error {
 	return nil
 }
 
-func (app *PokemonApplication) takeCommand(scanner *bufio.Scanner) (command.Command, error) {
+func (app *PokemonApplication) takeCommand(scanner *bufio.Scanner) (string, error) {
 	fmt.Print("pokedex:$ ")
 	scanner.Scan()
 	err := scanner.Err()
 	if err != nil {
 		fmt.Println("\nError occurred while scanning user input")
 		log.Fatal(err)
+		return "", err
 	}
 	stringCommandRepresentation := scanner.Text()
 
-	cmd, ok := command.Commands[stringCommandRepresentation]
-
-	if !ok {
-		return command.Command{}, errors.New("such command is not supported")
-	}
-
-	return cmd, nil
-}
-
-func (app *PokemonApplication) evaluateCommand(cmd command.Command) (string, error) {
-	outputData, err := cmd.Callback(&app.userContext)
-	if err != nil {
-		return outputData, err
-	}
-	return outputData, nil
+	return stringCommandRepresentation, nil
 }
 
 func (app *PokemonApplication) printResultOfCommand(result string) error {
@@ -66,15 +66,14 @@ func (app *PokemonApplication) printResultOfCommand(result string) error {
 	return nil
 }
 
-func (app *PokemonApplication) unknownCommand() {
-	fmt.Println("Given command is not supported. Use \"help\" if necessary.")
-}
-
 func (app *PokemonApplication) Run() error {
-	app.initializeComponents()
-	scanner := bufio.NewScanner(os.Stdin)
+	err := app.initializeComponents()
+	if err != nil {
+		return err
+	}
 
-	err := app.printWelcomeMessage()
+	scanner := bufio.NewScanner(os.Stdin)
+	err = app.printWelcomeMessage()
 	if err != nil {
 		return err
 	}
@@ -82,11 +81,13 @@ func (app *PokemonApplication) Run() error {
 	for {
 		inferredCommand, err := app.takeCommand(scanner)
 		if err != nil {
-			app.unknownCommand()
-			continue
+			return err
 		}
 
-		outputData, err := app.evaluateCommand(inferredCommand)
+		outputData, err := app.commander.Exec(inferredCommand, app.userContext)
+		if err != nil {
+			return err
+		}
 
 		err = app.printResultOfCommand(outputData)
 		if err != nil {

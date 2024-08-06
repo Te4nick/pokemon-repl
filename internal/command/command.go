@@ -1,45 +1,70 @@
 package command
 
 import (
+	"fmt"
+
 	callbacks "github.com/chrxn1c/pokemon-repl/internal/command/callbacks"
-	descriptions "github.com/chrxn1c/pokemon-repl/internal/command/descriptions"
-	names "github.com/chrxn1c/pokemon-repl/internal/command/names"
-	context "github.com/chrxn1c/pokemon-repl/internal/user_context"
+	"github.com/chrxn1c/pokemon-repl/internal/entity"
+	"github.com/chrxn1c/pokemon-repl/internal/user_context"
 )
 
-type Command struct {
-	Name        string
-	Description string
-	Callback    func(ctx *context.UserContext) (output string, err error)
+type Commander struct {
+	commands map[string]*entity.Command
 }
 
-var exitCommand Command = Command{
-	Name:        names.EXIT_NAME,
-	Description: descriptions.EXIT_DESCRIPTION,
-	Callback:    callbacks.ExitCallback,
+func NewCommander(cmds []*entity.Command) *Commander {
+	commander := &Commander{
+		commands: make(map[string]*entity.Command),
+	}
+
+	for _, cmd := range cmds {
+		switch cmd.Name {
+		case "help":
+			cmd.Callback = commander.helpCallback()
+		case "exit":
+			cmd.Callback = callbacks.ExitCallback
+		case "map":
+			cmd.Callback = callbacks.MapCallback
+		case "mapb":
+			cmd.Callback = callbacks.MapbCallback
+		default:
+			cmd.Callback = commander.notImplemented()
+		}
+		commander.commands[cmd.Name] = cmd
+	}
+
+	return commander
 }
 
-var helpCommand Command = Command{
-	Name:        names.HELP_NAME,
-	Description: descriptions.HELP_DESCRIPTION,
-	Callback:    callbacks.HelpCallback,
+func (c *Commander) notImplemented() entity.Callback {
+	return func(ctx *user_context.UserContext) (output string, err error) {
+		return "not implemented", nil
+	}
 }
 
-var mapCommand Command = Command{
-	Name:        names.MAP_NAME,
-	Description: descriptions.MAP_DESCIPTION,
-	Callback:    callbacks.MapCallback,
+func (c *Commander) helpCallback() entity.Callback {
+	return func(_ *user_context.UserContext) (output string, err error) {
+		helpStr := "\nFor now you can do the following:\n"
+		i := 1
+		for _, cmd := range c.commands {
+			helpStr += fmt.Sprintf("%d) %s - %s\n", i, cmd.Name, cmd.Description)
+			i++
+		}
+		return helpStr, nil
+	}
 }
 
-var mapbCommand Command = Command{
-	Name:        names.MAPB_NAME,
-	Description: descriptions.MAPB_DESCIPTION,
-	Callback:    callbacks.MapbCallback,
+func (c *Commander) unknownCommand() entity.Callback {
+	return func(_ *user_context.UserContext) (output string, err error) {
+		return "Given command is not supported. Use \"help\" if necessary.", nil
+	}
 }
 
-var Commands map[string]Command = map[string]Command{
-	names.EXIT_NAME: exitCommand,
-	names.HELP_NAME: helpCommand,
-	names.MAP_NAME:  mapCommand,
-	names.MAPB_NAME: mapbCommand,
+func (c *Commander) Exec(cmd string, ctx *user_context.UserContext) (output string, err error) {
+	command, ok := c.commands[cmd]
+	if !ok {
+		return c.unknownCommand()(ctx)
+	}
+
+	return command.Callback(ctx)
 }

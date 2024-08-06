@@ -8,6 +8,6 @@ func main() {
 	app := application.PokemonApplication{}
 	err := app.Run()
 	if err != nil {
-		return
+		panic(err)
 	}
 }
