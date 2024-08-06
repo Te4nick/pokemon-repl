@@ -2,9 +2,10 @@ package application
 
 import (
 	"fmt"
-	"github.com/chrxn1c/pokemon-repl/internal/pokecache"
 	"testing"
 	"time"
+
+	"github.com/chrxn1c/pokemon-repl/internal/pokecache"
 )
 
 func TestAddGet(t *testing.T) {
@@ -27,8 +28,8 @@ func TestAddGet(t *testing.T) {
 		t.Run(fmt.Sprintf("Test case %v", i), func(t *testing.T) {
 			cache := pokecache.NewCache(interval)
 			cache.Add(c.key, c.value)
-			val, ok := cache.Get(c.key)
-			if !ok {
+			val := cache.Get(c.key)
+			if val == nil {
 				t.Errorf("expected to find key")
 				return
 			}
@@ -46,16 +47,16 @@ func TestReapLoop(t *testing.T) {
 	cache := pokecache.NewCache(baseTime)
 	cache.Add("https://example.com", []byte("testdata"))
 
-	_, ok := cache.Get("https://example.com")
-	if !ok {
+	val := cache.Get("https://example.com")
+	if val == nil {
 		t.Errorf("expected to find key")
 		return
 	}
 
 	time.Sleep(waitTime)
 
-	_, ok = cache.Get("https://example.com")
-	if ok {
+	val = cache.Get("https://example.com")
+	if val != nil {
 		t.Errorf("expected to not find key")
 		return
 	}
