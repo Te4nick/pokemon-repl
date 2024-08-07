@@ -10,7 +10,7 @@ import (
 type Command struct {
 	Name        string
 	Description string
-	Callback    func(ctx *context.UserContext) (output string, err error)
+	Callback    func(ctx *context.UserContext, arg string) (output string, err error)
 }
 
 var exitCommand Command = Command{

@@ -12,13 +12,21 @@ type CallbackInterface interface {
 	Call(data string) (output string, err error)
 }
 
-func ExitCallback(ctx *user_context.UserContext) (string, error) {
+func ExitCallback(ctx *user_context.UserContext, arg string) (string, error) {
+	if len(arg) > 0 {
+		fmt.Println("Detected argument to help command which is not supported")
+		return "", nil
+	}
 	fmt.Println("\nIt's been a pleasure to have you onboard! Thanks for using this application")
 	os.Exit(0)
 	return "", nil
 }
 
-func HelpCallback(ctx *user_context.UserContext) (string, error) {
+func HelpCallback(ctx *user_context.UserContext, arg string) (string, error) {
+	if len(arg) > 0 {
+		fmt.Println("Detected argument to help command which is not supported")
+		return "", nil
+	}
 	fmt.Println("\nFor now you can do the following:\n" +
 		"1) type \"help\" command \n" +
 		"2) type \"exit\" command \n" +
@@ -28,7 +36,12 @@ func HelpCallback(ctx *user_context.UserContext) (string, error) {
 	return "", nil
 }
 
-func MapCallback(ctx *user_context.UserContext) (string, error) {
+func MapCallback(ctx *user_context.UserContext, arg string) (string, error) {
+
+	if len(arg) > 0 {
+		fmt.Println("Detected argument to map command which is not supported")
+		return "", nil
+	}
 	ctx.APIoffset += 20
 	currentURL := fmt.Sprintf("https://pokeapi.co/api/v2/location?limit=20&offset=%d", ctx.APIoffset)
 
@@ -47,7 +60,11 @@ func MapCallback(ctx *user_context.UserContext) (string, error) {
 	return toUserResponse, nil
 }
 
-func MapbCallback(ctx *user_context.UserContext) (string, error) {
+func MapbCallback(ctx *user_context.UserContext, arg string) (string, error) {
+	if len(arg) > 0 {
+		fmt.Println("Detected argument to mapb command which is not supported")
+		return "", nil
+	}
 	ctx.APIoffset -= 20
 	currentURL := fmt.Sprintf("https://pokeapi.co/api/v2/location?limit=20&offset=%d", ctx.APIoffset)
 	if ctx.APIoffset < 0 {

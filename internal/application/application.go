@@ -10,6 +10,7 @@ import (
 	"github.com/chrxn1c/pokemon-repl/internal/user_context/pokemon"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -34,27 +35,32 @@ func (app *PokemonApplication) printWelcomeMessage() error {
 	return nil
 }
 
-func (app *PokemonApplication) takeCommand(scanner *bufio.Scanner) (command.Command, error) {
+func (app *PokemonApplication) takeCommand(scanner *bufio.Scanner) (inferredCommand command.Command, argument string, err error) {
 	fmt.Print("pokedex:$ ")
 	scanner.Scan()
-	err := scanner.Err()
+	err = scanner.Err()
 	if err != nil {
 		fmt.Println("\nError occurred while scanning user input")
 		log.Fatal(err)
 	}
-	stringCommandRepresentation := scanner.Text()
+	stringCommandAndArgumentRepresentation := scanner.Text()
+	splitString := strings.Split(stringCommandAndArgumentRepresentation, " ")
 
-	cmd, ok := command.Commands[stringCommandRepresentation]
+	inferredCommand, ok := command.Commands[splitString[0]]
 
 	if !ok {
-		return command.Command{}, errors.New("such command is not supported")
+		return command.Command{}, "", errors.New("such command is not supported")
 	}
 
-	return cmd, nil
+	if len(splitString) > 1 {
+		argument = splitString[1]
+	}
+
+	return inferredCommand, argument, nil
 }
 
-func (app *PokemonApplication) evaluateCommand(cmd command.Command) (string, error) {
-	outputData, err := cmd.Callback(&app.userContext)
+func (app *PokemonApplication) evaluateCommand(cmd command.Command, arg string) (string, error) {
+	outputData, err := cmd.Callback(&app.userContext, arg)
 	if err != nil {
 		return outputData, err
 	}
@@ -80,13 +86,13 @@ func (app *PokemonApplication) Run() error {
 	}
 
 	for {
-		inferredCommand, err := app.takeCommand(scanner)
+		inferredCommand, argument, err := app.takeCommand(scanner)
 		if err != nil {
 			app.unknownCommand()
 			continue
 		}
 
-		outputData, err := app.evaluateCommand(inferredCommand)
+		outputData, err := app.evaluateCommand(inferredCommand, argument)
 
 		err = app.printResultOfCommand(outputData)
 		if err != nil {
