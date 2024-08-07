@@ -5,8 +5,12 @@ import (
 )
 
 func main() {
-	app := application.PokemonApplication{}
-	err := app.Run()
+	app, err := application.New()
+	if err != nil {
+		panic(err)
+	}
+
+	err = app.Run()
 	if err != nil {
 		panic(err)
 	}

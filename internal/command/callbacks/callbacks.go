@@ -1,11 +1,11 @@
 package callbacks
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/chrxn1c/pokemon-repl/internal/user_context"
-	"log"
 	"os"
+
+	"github.com/chrxn1c/pokemon-repl/internal/user_context"
+	"github.com/chrxn1c/pokemon-repl/pkg/api"
 )
 
 type CallbackInterface interface {
@@ -18,30 +18,17 @@ func ExitCallback(ctx *user_context.UserContext) (string, error) {
 	return "", nil
 }
 
-func HelpCallback(ctx *user_context.UserContext) (string, error) {
-	fmt.Println("\nFor now you can do the following:\n" +
-		"1) type \"help\" command \n" +
-		"2) type \"exit\" command \n" +
-		"3) type \"map\" command to explore the next 20 locations\n" +
-		"4) type \"mapb\" command to explore the previous 20 locations")
-
-	return "", nil
-}
-
 func MapCallback(ctx *user_context.UserContext) (string, error) {
 	ctx.APIoffset += 20
-	currentURL := fmt.Sprintf("https://pokeapi.co/api/v2/location?limit=20&offset=%d", ctx.APIoffset)
+	endpoint := fmt.Sprintf("location?limit=20&offset=%d", ctx.APIoffset)
 
-	body, err := makeAPIRequestAndProcessErrors(ctx, currentURL)
-
-	apiResponse := mapResponse{}
-	err = json.Unmarshal(body, &apiResponse)
+	locations, err := api.Resource(endpoint)
 	if err != nil {
 		return "", err
 	}
 
 	toUserResponse := ""
-	for _, location := range apiResponse.Results {
+	for _, location := range locations.Results {
 		toUserResponse += fmt.Sprintf("%v\n", location.Name)
 	}
 	return toUserResponse, nil
@@ -49,21 +36,15 @@ func MapCallback(ctx *user_context.UserContext) (string, error) {
 
 func MapbCallback(ctx *user_context.UserContext) (string, error) {
 	ctx.APIoffset -= 20
-	currentURL := fmt.Sprintf("https://pokeapi.co/api/v2/location?limit=20&offset=%d", ctx.APIoffset)
-	if ctx.APIoffset < 0 {
-		log.Fatalf("Cannot traverse previous locations since you are at the very beginning ($mapb command), user context: %v\nURL: %v\n", ctx, currentURL)
-	}
+	endpoint := fmt.Sprintf("location?limit=20&offset=%d", ctx.APIoffset)
 
-	body, err := makeAPIRequestAndProcessErrors(ctx, currentURL)
-
-	apiResponse := mapResponse{}
-	err = json.Unmarshal(body, &apiResponse)
+	locations, err := api.Resource(endpoint)
 	if err != nil {
 		return "", err
 	}
 
 	toUserResponse := ""
-	for _, location := range apiResponse.Results {
+	for _, location := range locations.Results {
 		toUserResponse += fmt.Sprintf("%v\n", location.Name)
 	}
 	return toUserResponse, nil
