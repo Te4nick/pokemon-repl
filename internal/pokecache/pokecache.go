@@ -1,6 +1,7 @@
 package pokecache
 
 import (
+	"context"
 	"sync"
 	"time"
 )
@@ -11,14 +12,14 @@ type cacheEntry struct {
 }
 
 type Cache struct {
-	mutex                 sync.Mutex
+	mutex                 *sync.RWMutex
 	content               map[string]cacheEntry
 	destroyValueTimestamp time.Duration
 }
 
 func NewCache(destroyValueTimestamp time.Duration) (cache *Cache) {
 	return &Cache{
-		mutex:                 sync.Mutex{},
+		mutex:                 &sync.RWMutex{},
 		content:               map[string]cacheEntry{},
 		destroyValueTimestamp: destroyValueTimestamp,
 	}
@@ -26,35 +27,31 @@ func NewCache(destroyValueTimestamp time.Duration) (cache *Cache) {
 
 func (cache *Cache) Add(key string, value []byte) {
 	cache.mutex.Lock()
-
-	defer cache.destroyRottenValue(key)
 	defer cache.mutex.Unlock()
+
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), cache.destroyValueTimestamp)
+		defer cancel()
+		<-ctx.Done()
+		cache.mutex.Lock()
+		delete(cache.content, key)
+		cache.mutex.Unlock()
+	}()
 
 	cache.content[key] = cacheEntry{
 		createdAt: time.Now(),
-		value:     value}
+		value:     value,
+	}
 }
 
-func (cache *Cache) Get(key string) (value []byte, isFound bool) {
-	cache.mutex.Lock()
-	defer cache.mutex.Unlock()
+func (cache *Cache) Get(key string) (value []byte) {
+	cache.mutex.RLock()
+	defer cache.mutex.RUnlock()
 
-	valueByKey, isFound := cache.content[key]
-
-	if !isFound {
-		return []byte{}, false
+	valueByKey, ok := cache.content[key]
+	if !ok {
+		return nil
 	}
 
-	return valueByKey.value, true
-}
-
-func (cache *Cache) destroyRottenValue(key string) {
-	cache.mutex.Lock()
-	defer cache.mutex.Unlock()
-
-	timer := time.NewTimer(cache.destroyValueTimestamp)
-	go func() {
-		<-timer.C
-		delete(cache.content, key)
-	}()
+	return valueByKey.value
 }

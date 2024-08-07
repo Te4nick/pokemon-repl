@@ -1,17 +1,18 @@
 package callbacks
 
 import (
-	"github.com/chrxn1c/pokemon-repl/internal/user_context"
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/chrxn1c/pokemon-repl/internal/user_context"
 )
 
 func makeAPIRequestAndProcessErrors(ctx *user_context.UserContext, currentURL string) (body []byte, err error) {
 
-	cachedResponse, isCached := ctx.Cache.Get(currentURL)
-	if isCached {
-		return cachedResponse, nil
+	cached := ctx.Cache.Get(currentURL)
+	if cached != nil {
+		return cached, nil
 	}
 
 	response, err := http.Get(currentURL)
