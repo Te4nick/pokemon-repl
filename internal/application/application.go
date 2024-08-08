@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/chrxn1c/pokemon-repl/internal/command"
@@ -50,18 +51,26 @@ func (app *PokemonApplication) printWelcomeMessage() error {
 	return nil
 }
 
-func (app *PokemonApplication) takeCommand(scanner *bufio.Scanner) (string, error) {
+func (app *PokemonApplication) takeCommand(scanner *bufio.Scanner) (inferredCommand string, argument string, err error) {
+
 	fmt.Print("pokedex:$ ")
 	scanner.Scan()
-	err := scanner.Err()
+	err = scanner.Err()
 	if err != nil {
 		fmt.Println("\nError occurred while scanning user input")
 		log.Fatal(err)
-		return "", err
+		return "", "", err
 	}
-	stringCommandRepresentation := scanner.Text()
+	stringCommandAndArgumentRepresentation := scanner.Text()
+	splitString := strings.Split(stringCommandAndArgumentRepresentation, " ")
 
-	return stringCommandRepresentation, nil
+	inferredCommand = splitString[0]
+
+	if len(splitString) > 1 {
+		argument = splitString[1]
+	}
+
+	return inferredCommand, argument, nil
 }
 
 func (app *PokemonApplication) printResultOfCommand(result string) error {
@@ -77,12 +86,12 @@ func (app *PokemonApplication) Run() error {
 	}
 
 	for {
-		inferredCommand, err := app.takeCommand(scanner)
+		inferredCommand, argument, err := app.takeCommand(scanner)
 		if err != nil {
 			return err
 		}
 
-		outputData, err := app.commander.Exec(inferredCommand, app.userContext)
+		outputData, err := app.commander.Exec(inferredCommand, argument, app.userContext)
 		if err != nil {
 			return err
 		}

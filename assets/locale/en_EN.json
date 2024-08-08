@@ -15,6 +15,10 @@
         {
             "name": "mapb",
             "description": "Shows the previous 20 locations, error when no previous locations found."
+        },
+        {
+            "name": "explore",
+            "description": "Find out what pokemons live in the area given in the argument"
         }
     ]
 }

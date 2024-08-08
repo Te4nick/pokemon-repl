@@ -25,8 +25,10 @@ func NewCommander(cmds []*entity.Command) *Commander {
 			cmd.Callback = MapCallback
 		case "mapb":
 			cmd.Callback = MapbCallback
+		case "explore":
+			cmd.Callback = ExploreCallback
 		default:
-			cmd.Callback = commander.notImplemented()
+			cmd.Callback = commander.notImplemented
 		}
 		commander.commands[cmd.Name] = cmd
 	}
@@ -34,13 +36,15 @@ func NewCommander(cmds []*entity.Command) *Commander {
 	return commander
 }
 
-func (c *Commander) notImplemented() entity.Callback {
-	return func(ctx *entity.UserContext) (output string, err error) {
-		return "not implemented", nil
-	}
+func (c *Commander) notImplemented(_ *entity.UserContext, _ string) (output string, err error) {
+	return "not implemented", nil
 }
 
-func (c *Commander) helpCallback(_ *entity.UserContext) (output string, err error) {
+func (c *Commander) helpCallback(_ *entity.UserContext, arg string) (output string, err error) {
+	if len(arg) > 0 {
+		fmt.Println("Detected argument to help command which is not supported")
+		return "", nil
+	}
 	helpStr := "\nFor now you can do the following:\n"
 	i := 1
 	for _, cmd := range c.commands {
@@ -50,11 +54,11 @@ func (c *Commander) helpCallback(_ *entity.UserContext) (output string, err erro
 	return helpStr, nil
 }
 
-func (c *Commander) Exec(cmd string, ctx *entity.UserContext) (output string, err error) {
+func (c *Commander) Exec(cmd, arg string, ctx *entity.UserContext) (output string, err error) {
 	command, ok := c.commands[cmd]
 	if !ok {
 		return "Given command is not supported. Use \"help\" if necessary.", nil
 	}
 
-	return command.Callback(ctx)
+	return command.Callback(ctx, arg)
 }

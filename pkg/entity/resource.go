@@ -1,14 +1,18 @@
 package entity
 
 type Resource struct {
-	Count    int      `json:"count"`
-	Next     string   `json:"next"`
-	Previous string   `json:"previous"`
-	Results  []Result `json:"results"`
+	Count    int                `json:"count"`
+	Next     string             `json:"next"`
+	Previous string             `json:"previous"`
+	Results  []NamedAPIResource `json:"results"`
 }
 
-// Result is a resource list result.
-type Result struct {
+type NamedAPIResource struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
+}
+
+type Name struct {
+	Name     string           `json:"name"`
+	Language NamedAPIResource `json:"language"`
 }

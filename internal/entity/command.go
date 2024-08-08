@@ -1,6 +1,6 @@
 package entity
 
-type Callback func(ctx *UserContext) (output string, err error)
+type Callback func(ctx *UserContext, arg string) (string, error)
 
 type Command struct {
 	Name        string `json:"name"`
