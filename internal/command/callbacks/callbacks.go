@@ -85,3 +85,36 @@ func MapbCallback(ctx *user_context.UserContext, arg string) (string, error) {
 	}
 	return toUserResponse, nil
 }
+
+func ExploreCallback(ctx *user_context.UserContext, arg string) (string, error) {
+	if len(arg) == 0 {
+		fmt.Println("You need to pass area-name as an argument to explore it.\n")
+		return "", nil
+	}
+
+	currentURL := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%v/", arg)
+
+	body, err := makeAPIRequestAndProcessErrors(ctx, currentURL)
+
+	apiResponse := exploreResponse{}
+	err = json.Unmarshal(body, &apiResponse)
+	if err != nil {
+		return "", err
+	}
+
+	toUserResponse := fmt.Sprintf("Exploring %v ...\n", arg)
+	foundPokemonsAnnouncement := "Found Pokemon:\n"
+	foundPokemons := ""
+
+	for _, pokemonEncounter := range apiResponse.PokemonEncounters {
+		foundPokemons += fmt.Sprintf("  - %v\n", pokemonEncounter.Pokemon.Name)
+	}
+
+	if len(foundPokemons) == 0 {
+		foundPokemonsAnnouncement = "Haven't found any pokemons within given area.\n"
+	}
+
+	toUserResponse += foundPokemonsAnnouncement + foundPokemons
+
+	return toUserResponse, nil
+}
