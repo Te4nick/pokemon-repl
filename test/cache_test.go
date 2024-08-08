@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chrxn1c/pokemon-repl/internal/pokecache"
+	"github.com/chrxn1c/pokemon-repl/pkg/cache"
 )
 
 func TestAddGet(t *testing.T) {
@@ -26,8 +26,8 @@ func TestAddGet(t *testing.T) {
 
 	for i, c := range cases {
 		t.Run(fmt.Sprintf("Test case %v", i), func(t *testing.T) {
-			cache := pokecache.NewCache(interval)
-			cache.Add(c.key, c.value)
+			cache := cache.NewCache(interval)
+			cache.Set(c.key, c.value)
 			val := cache.Get(c.key)
 			if val == nil {
 				t.Errorf("expected to find key")
@@ -44,8 +44,8 @@ func TestAddGet(t *testing.T) {
 func TestReapLoop(t *testing.T) {
 	const baseTime = 5 * time.Millisecond
 	const waitTime = baseTime + 5*time.Millisecond
-	cache := pokecache.NewCache(baseTime)
-	cache.Add("https://example.com", []byte("testdata"))
+	cache := cache.NewCache(baseTime)
+	cache.Set("https://example.com", []byte("testdata"))
 
 	val := cache.Get("https://example.com")
 	if val == nil {

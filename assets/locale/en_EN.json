@@ -1,0 +1,24 @@
+{
+    "commands": [
+        {
+            "name": "help",
+            "description": "Lost in UI? Let me handle this."
+        },
+        {
+            "name": "exit",
+            "description": "Done and gone?."
+        },
+        {
+            "name": "map",
+            "description": "Shows the next 20 locations."
+        },
+        {
+            "name": "mapb",
+            "description": "Shows the previous 20 locations, error when no previous locations found."
+        },
+        {
+            "name": "explore",
+            "description": "Find out what pokemons live in the area given in the argument"
+        }
+    ]
+}
