@@ -33,7 +33,7 @@ func TestAddGet(t *testing.T) {
 				t.Errorf("expected to find key")
 				return
 			}
-			if string(val.([]byte)) != string(c.value) {
+			if string(val) != string(c.value) {
 				t.Errorf("expected to find value")
 				return
 			}

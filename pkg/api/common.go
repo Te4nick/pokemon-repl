@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"reflect"
 	"strings"
 
 	"github.com/chrxn1c/pokemon-repl/pkg/cache"
@@ -24,7 +23,10 @@ func Fetch(endpoint string, out interface{}) error {
 
 	data := c.Get(endpoint)
 	if data != nil {
-		reflect.ValueOf(out).Elem().Set(reflect.ValueOf(data).Elem())
+		err := json.Unmarshal(data, out)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 
@@ -57,6 +59,6 @@ func Fetch(endpoint string, out interface{}) error {
 		return err
 	}
 
-	c.Set(endpoint, out)
+	c.Set(endpoint, body)
 	return nil
 }

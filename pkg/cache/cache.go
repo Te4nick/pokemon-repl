@@ -10,19 +10,19 @@ const CacheDefaultTTL time.Duration = time.Minute * 5
 
 type Cache struct {
 	mutex   *sync.RWMutex
-	content map[string]interface{}
+	content map[string][]byte
 	ttl     time.Duration
 }
 
 func NewCache(ttl time.Duration) (cache *Cache) {
 	return &Cache{
 		mutex:   &sync.RWMutex{},
-		content: map[string]interface{}{},
+		content: map[string][]byte{},
 		ttl:     ttl,
 	}
 }
 
-func (cache *Cache) Set(key string, value interface{}) {
+func (cache *Cache) Set(key string, value []byte) {
 	cache.mutex.Lock()
 	defer cache.mutex.Unlock()
 
@@ -38,7 +38,7 @@ func (cache *Cache) Set(key string, value interface{}) {
 	cache.content[key] = value
 }
 
-func (cache *Cache) Get(key string) interface{} {
+func (cache *Cache) Get(key string) []byte {
 	cache.mutex.RLock()
 	defer cache.mutex.RUnlock()
 
