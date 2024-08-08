@@ -8,8 +8,7 @@ import (
 	"time"
 
 	"github.com/chrxn1c/pokemon-repl/internal/command"
-	"github.com/chrxn1c/pokemon-repl/internal/user_context"
-	"github.com/chrxn1c/pokemon-repl/internal/user_context/pokemon"
+	"github.com/chrxn1c/pokemon-repl/internal/entity"
 	"github.com/chrxn1c/pokemon-repl/internal/utils"
 	"github.com/chrxn1c/pokemon-repl/pkg/cache"
 )
@@ -19,16 +18,16 @@ type Application interface {
 }
 
 type PokemonApplication struct {
-	userContext    *user_context.UserContext
+	userContext    *entity.UserContext
 	contentManager *utils.ContentManager
 	commander      *command.Commander
 }
 
 func New() (*PokemonApplication, error) {
-	userContext := &user_context.UserContext{
-		APIoffset:      -20, // $ map will increase offset by 20 first and then inspect the given offset
-		CaughtPokemons: []pokemon.Pokemon{},
-		Cache:          cache.NewCache(5 * time.Second),
+	userContext := &entity.UserContext{
+		APIoffset: -20, // $ map will increase offset by 20 first and then inspect the given offset
+		// CaughtPokemons: []entity.Pokemon{}, // TODO: move to context
+		Cache: cache.NewCache(5 * time.Second),
 	}
 
 	var err error

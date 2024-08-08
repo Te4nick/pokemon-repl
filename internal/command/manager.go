@@ -3,16 +3,16 @@ package command
 import (
 	"fmt"
 
-	"github.com/chrxn1c/pokemon-repl/internal/user_context"
+	"github.com/chrxn1c/pokemon-repl/internal/entity"
 )
 
 type Commander struct {
-	commands map[string]*Command
+	commands map[string]*entity.Command
 }
 
-func NewCommander(cmds []*Command) *Commander {
+func NewCommander(cmds []*entity.Command) *Commander {
 	commander := &Commander{
-		commands: make(map[string]*Command),
+		commands: make(map[string]*entity.Command),
 	}
 
 	for _, cmd := range cmds {
@@ -34,13 +34,13 @@ func NewCommander(cmds []*Command) *Commander {
 	return commander
 }
 
-func (c *Commander) notImplemented() Callback {
-	return func(ctx *user_context.UserContext) (output string, err error) {
+func (c *Commander) notImplemented() entity.Callback {
+	return func(ctx *entity.UserContext) (output string, err error) {
 		return "not implemented", nil
 	}
 }
 
-func (c *Commander) helpCallback(_ *user_context.UserContext) (output string, err error) {
+func (c *Commander) helpCallback(_ *entity.UserContext) (output string, err error) {
 	helpStr := "\nFor now you can do the following:\n"
 	i := 1
 	for _, cmd := range c.commands {
@@ -50,7 +50,7 @@ func (c *Commander) helpCallback(_ *user_context.UserContext) (output string, er
 	return helpStr, nil
 }
 
-func (c *Commander) Exec(cmd string, ctx *user_context.UserContext) (output string, err error) {
+func (c *Commander) Exec(cmd string, ctx *entity.UserContext) (output string, err error) {
 	command, ok := c.commands[cmd]
 	if !ok {
 		return "Given command is not supported. Use \"help\" if necessary.", nil
