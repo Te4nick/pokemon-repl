@@ -24,7 +24,7 @@ func Fetch(endpoint string, out interface{}) error {
 
 	data := c.Get(endpoint)
 	if data != nil {
-		reflect.ValueOf(out).Elem().Set(reflect.ValueOf(data))
+		reflect.ValueOf(out).Elem().Set(reflect.ValueOf(data).Elem())
 		return nil
 	}
 
@@ -52,7 +52,7 @@ func Fetch(endpoint string, out interface{}) error {
 		return err
 	}
 
-	err = json.Unmarshal(body, &out)
+	err = json.Unmarshal(body, out)
 	if err != nil {
 		return err
 	}

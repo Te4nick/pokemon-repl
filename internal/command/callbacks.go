@@ -1,4 +1,4 @@
-package callbacks
+package command
 
 import (
 	"fmt"
@@ -8,9 +8,7 @@ import (
 	"github.com/chrxn1c/pokemon-repl/pkg/api"
 )
 
-type CallbackInterface interface {
-	Call(data string) (output string, err error)
-}
+type Callback func(ctx *user_context.UserContext) (output string, err error)
 
 func ExitCallback(ctx *user_context.UserContext) (string, error) {
 	fmt.Println("\nIt's been a pleasure to have you onboard! Thanks for using this application")
