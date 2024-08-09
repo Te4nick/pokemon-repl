@@ -28,6 +28,8 @@ func NewCommander(cmds []*entity.Command) *Commander {
 			cmd.Callback = MapbCallback
 		case "explore":
 			cmd.Callback = ExploreCallback
+		case "inspect":
+			cmd.Callback = InspectCallback
 		case "catch":
 			cmd.Callback = CatchCallback
 		case "pokedex":

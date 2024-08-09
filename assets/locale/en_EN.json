@@ -25,6 +25,10 @@
             "description": "Try to catch pokemon!"
         },
         {
+            "name": "inspect",
+            "description": "Find out stats of given pokemon."
+        },
+        {
             "name": "pokedex",
             "description": "Display all the pokemons you have caught."
         }

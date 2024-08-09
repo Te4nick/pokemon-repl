@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/chrxn1c/pokemon-repl/pkg/api"
 	"github.com/chrxn1c/pokemon-repl/pkg/pokectx"
@@ -43,7 +45,7 @@ func MapCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 }
 
 func MapbCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
-	if len(arg) > 0 {
+	if len(arg) == 0 {
 		fmt.Println("Detected argument to map command which is not supported")
 		return "", nil
 	}
@@ -66,7 +68,7 @@ func MapbCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 }
 
 func ExploreCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
-	if len(arg) == 0 {
+	if len(arg) == 0 || strings.Contains(arg, " ") {
 		fmt.Println("You need to pass area-name as an argument to explore it.")
 		return "", nil
 	}
@@ -94,7 +96,7 @@ func ExploreCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 }
 
 func CatchCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
-	if len(arg) == 0 {
+	if len(arg) == 0 || strings.Contains(arg, " ") {
 		fmt.Println("You need to pass pokemon name as an argument to catch it.")
 		return "", nil
 	}
@@ -112,6 +114,42 @@ func CatchCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 
 	ctx.Set("pokedex", pokemon.Name)
 	return "Congratulations! You've caught " + pokemon.Name + "!", nil
+}
+
+func InspectCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
+	if len(arg) == 0 || strings.Contains(arg, " ") {
+		fmt.Println("This command requires an argument, virtually one.")
+		return "", nil
+	}
+
+	caughtPokemons, _ := ctx.Get("pokedex")
+	if !strings.Contains(caughtPokemons, arg) {
+		return "You have not caught that pokemon\n", nil
+	}
+
+	// TODO: inspect pokemon via te4nick structure
+	pokemonInfo, err := api.Pokemon(arg)
+	if err != nil {
+		return "Error when making request to the API", err
+	}
+
+	toUserResponse := ""
+	toUserResponse += "Name: " + pokemonInfo.Name + "\n"
+	toUserResponse += "Height: " + strconv.Itoa(pokemonInfo.Height) + "\n"
+	toUserResponse += "Weight: " + strconv.Itoa(pokemonInfo.Weight) + "\n"
+	toUserResponse += "Stats: " + "\n"
+
+	for _, characteristic := range pokemonInfo.Stats {
+		toUserResponse += "  - " + characteristic.Stat.Name + ": " + strconv.Itoa(characteristic.BaseStat) + "\n"
+	}
+
+	toUserResponse += "Types: " + "\n"
+
+	for _, pokemonType := range pokemonInfo.Types {
+		toUserResponse += "  - " + pokemonType.Type.Name + " \n"
+	}
+
+	return toUserResponse, nil
 }
 
 func PokedexCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
