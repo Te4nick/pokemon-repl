@@ -28,7 +28,7 @@ func MapCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 	apiOffset := pokectx.GetDefaultNum(ctx, 0, "api", "location", "offset")
 	apiOffset += 20
 	pokectx.SetNum(ctx, apiOffset, "api", "location", "offset")
-	endpoint := fmt.Sprintf("location?limit=20&offset=%d", apiOffset)
+	endpoint := fmt.Sprintf("location-area?limit=20&offset=%d", apiOffset)
 
 	locations, err := api.Resource(endpoint)
 	if err != nil {
