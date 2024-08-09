@@ -23,6 +23,10 @@
         {
             "name": "catch",
             "description": "Try to catch pokemon!"
+        },
+        {
+            "name": "pokedex",
+            "description": "Display all the pokemons you have caught."
         }
     ]
 }

@@ -30,6 +30,8 @@ func NewCommander(cmds []*entity.Command) *Commander {
 			cmd.Callback = ExploreCallback
 		case "catch":
 			cmd.Callback = CatchCallback
+		case "pokedex":
+			cmd.Callback = PokedexCallback
 		default:
 			cmd.Callback = commander.notImplemented
 		}

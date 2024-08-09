@@ -113,3 +113,14 @@ func CatchCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 	ctx.Set("pokedex", pokemon.Name)
 	return "Congratulations! You've caught " + pokemon.Name + "!", nil
 }
+
+func PokedexCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
+	if len(arg) != 0 {
+		fmt.Println("This command does not require any arguments.")
+		return "", nil
+	}
+
+	caughtPokemons, _ := ctx.Get("pokedex")
+
+	return caughtPokemons, nil
+}
