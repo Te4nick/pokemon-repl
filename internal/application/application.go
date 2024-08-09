@@ -6,12 +6,10 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/chrxn1c/pokemon-repl/internal/command"
-	"github.com/chrxn1c/pokemon-repl/internal/entity"
 	"github.com/chrxn1c/pokemon-repl/internal/utils"
-	"github.com/chrxn1c/pokemon-repl/pkg/cache"
+	"github.com/chrxn1c/pokemon-repl/pkg/pokectx"
 )
 
 type Application interface {
@@ -19,17 +17,14 @@ type Application interface {
 }
 
 type PokemonApplication struct {
-	userContext    *entity.UserContext
+	context        *pokectx.PokeCTX
 	contentManager *utils.ContentManager
 	commander      *command.Commander
 }
 
 func New() (*PokemonApplication, error) {
-	userContext := &entity.UserContext{
-		APIoffset: -20, // $ map will increase offset by 20 first and then inspect the given offset
-		// CaughtPokemons: []entity.Pokemon{}, // TODO: move to context
-		Cache: cache.NewCache(5 * time.Second),
-	}
+	pokeCTX := pokectx.New()
+	pokectx.SetNum(pokeCTX, -20, "api", "location", "offset")
 
 	var err error
 	contentManager, err := utils.NewContentManager("en_EN")
@@ -40,7 +35,7 @@ func New() (*PokemonApplication, error) {
 	commander := command.NewCommander(contentManager.Commands)
 
 	return &PokemonApplication{
-		userContext:    userContext,
+		context:        pokeCTX,
 		contentManager: contentManager,
 		commander:      commander,
 	}, nil
@@ -91,7 +86,7 @@ func (app *PokemonApplication) Run() error {
 			return err
 		}
 
-		outputData, err := app.commander.Exec(inferredCommand, argument, app.userContext)
+		outputData, err := app.commander.Exec(inferredCommand, argument, app.context)
 		if err != nil {
 			return err
 		}

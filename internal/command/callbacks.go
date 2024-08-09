@@ -2,13 +2,14 @@ package command
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 
-	"github.com/chrxn1c/pokemon-repl/internal/entity"
 	"github.com/chrxn1c/pokemon-repl/pkg/api"
+	"github.com/chrxn1c/pokemon-repl/pkg/pokectx"
 )
 
-func ExitCallback(ctx *entity.UserContext, arg string) (string, error) {
+func ExitCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
 	if len(arg) > 0 {
 		fmt.Println("Detected argument to help command which is not supported")
 		return "", nil
@@ -18,14 +19,16 @@ func ExitCallback(ctx *entity.UserContext, arg string) (string, error) {
 	return "", nil
 }
 
-func MapCallback(ctx *entity.UserContext, arg string) (string, error) {
+func MapCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
 	if len(arg) > 0 {
 		fmt.Println("Detected argument to map command which is not supported")
 		return "", nil
 	}
 
-	ctx.APIoffset += 20
-	endpoint := fmt.Sprintf("location?limit=20&offset=%d", ctx.APIoffset)
+	apiOffset := pokectx.GetDefaultNum(ctx, 0, "api", "location", "offset")
+	apiOffset += 20
+	pokectx.SetNum(ctx, apiOffset, "api", "location", "offset")
+	endpoint := fmt.Sprintf("location?limit=20&offset=%d", apiOffset)
 
 	locations, err := api.Resource(endpoint)
 	if err != nil {
@@ -39,14 +42,16 @@ func MapCallback(ctx *entity.UserContext, arg string) (string, error) {
 	return toUserResponse, nil
 }
 
-func MapbCallback(ctx *entity.UserContext, arg string) (string, error) {
+func MapbCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
 	if len(arg) > 0 {
 		fmt.Println("Detected argument to map command which is not supported")
 		return "", nil
 	}
 
-	ctx.APIoffset -= 20
-	endpoint := fmt.Sprintf("location?limit=20&offset=%d", ctx.APIoffset)
+	apiOffset := pokectx.GetDefaultNum(ctx, 0, "api", "location", "offset")
+	apiOffset -= 20
+	pokectx.SetNum(ctx, apiOffset, "api", "location", "offset")
+	endpoint := fmt.Sprintf("location?limit=20&offset=%d", apiOffset)
 
 	locations, err := api.Resource(endpoint)
 	if err != nil {
@@ -60,7 +65,7 @@ func MapbCallback(ctx *entity.UserContext, arg string) (string, error) {
 	return toUserResponse, nil
 }
 
-func ExploreCallback(ctx *entity.UserContext, arg string) (string, error) {
+func ExploreCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
 	if len(arg) == 0 {
 		fmt.Println("You need to pass area-name as an argument to explore it.")
 		return "", nil
@@ -86,4 +91,25 @@ func ExploreCallback(ctx *entity.UserContext, arg string) (string, error) {
 	toUserResponse += foundPokemonsAnnouncement + foundPokemons
 
 	return toUserResponse, nil
+}
+
+func CatchCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
+	if len(arg) == 0 {
+		fmt.Println("You need to pass pokemon name as an argument to catch it.")
+		return "", nil
+	}
+
+	baseChance := 0.3 + rand.Float32()/2.0
+
+	pokemon, err := api.Pokemon(arg)
+	if err != nil {
+		return "", err
+	}
+
+	if baseChance-float32(pokemon.BaseExperience)/1000.0 < 0.5 {
+		return "Couldn't catch " + pokemon.Name + "... Try again!", nil
+	}
+
+	ctx.Set("pokedex", pokemon.Name)
+	return "Congratulations! You've caught " + pokemon.Name + "!", nil
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/chrxn1c/pokemon-repl/internal/entity"
+	"github.com/chrxn1c/pokemon-repl/pkg/pokectx"
 )
 
 type Commander struct {
@@ -27,6 +28,8 @@ func NewCommander(cmds []*entity.Command) *Commander {
 			cmd.Callback = MapbCallback
 		case "explore":
 			cmd.Callback = ExploreCallback
+		case "catch":
+			cmd.Callback = CatchCallback
 		default:
 			cmd.Callback = commander.notImplemented
 		}
@@ -36,11 +39,11 @@ func NewCommander(cmds []*entity.Command) *Commander {
 	return commander
 }
 
-func (c *Commander) notImplemented(_ *entity.UserContext, _ string) (output string, err error) {
+func (c *Commander) notImplemented(_ *pokectx.PokeCTX, _ string) (output string, err error) {
 	return "not implemented", nil
 }
 
-func (c *Commander) helpCallback(_ *entity.UserContext, arg string) (output string, err error) {
+func (c *Commander) helpCallback(_ *pokectx.PokeCTX, arg string) (output string, err error) {
 	if len(arg) > 0 {
 		fmt.Println("Detected argument to help command which is not supported")
 		return "", nil
@@ -54,7 +57,7 @@ func (c *Commander) helpCallback(_ *entity.UserContext, arg string) (output stri
 	return helpStr, nil
 }
 
-func (c *Commander) Exec(cmd, arg string, ctx *entity.UserContext) (output string, err error) {
+func (c *Commander) Exec(cmd, arg string, ctx *pokectx.PokeCTX) (output string, err error) {
 	command, ok := c.commands[cmd]
 	if !ok {
 		return "Given command is not supported. Use \"help\" if necessary.", nil
