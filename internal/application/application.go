@@ -17,7 +17,7 @@ type Application interface {
 }
 
 type PokemonApplication struct {
-	context        *pokectx.PokeCTX
+	context        *pokectx.Te4nickPokeCTX
 	contentManager *utils.ContentManager
 	commander      *command.Commander
 }

@@ -4,14 +4,14 @@ import (
 	"strconv"
 )
 
-type PokeCTX struct {
-	root *node
+type Te4nickPokeCTX struct {
+	root *te4nickNode
 }
 
-func New(path ...string) *PokeCTX {
-	ctx := &PokeCTX{
-		root: &node{
-			children: make(map[string]*node),
+func New(path ...string) *Te4nickPokeCTX {
+	ctx := &Te4nickPokeCTX{
+		root: &te4nickNode{
+			children: make(map[string]*te4nickNode),
 		},
 	}
 
@@ -19,11 +19,11 @@ func New(path ...string) *PokeCTX {
 	return ctx
 }
 
-func (ctx *PokeCTX) Set(path ...string) {
+func (ctx *Te4nickPokeCTX) Set(path ...string) {
 	ctx.root.set(path...)
 }
 
-func (ctx *PokeCTX) Get(path ...string) (string, bool) {
+func (ctx *Te4nickPokeCTX) Get(path ...string) (string, bool) {
 	return ctx.root.get(path...)
 }
 
@@ -43,7 +43,7 @@ type Number interface {
 	Ints | Uints | Floats
 }
 
-func GetDefaultNum[T Number](ctx *PokeCTX, defaultVar T, path ...string) T {
+func GetDefaultNum[T Number](ctx *Te4nickPokeCTX, defaultVar T, path ...string) T {
 	s, found := ctx.Get(path...)
 	if !found {
 		return defaultVar
@@ -76,7 +76,7 @@ func GetDefaultNum[T Number](ctx *PokeCTX, defaultVar T, path ...string) T {
 	}
 }
 
-func SetNum[T Number](ctx *PokeCTX, number T, path ...string) {
+func SetNum[T Number](ctx *Te4nickPokeCTX, number T, path ...string) {
 	var s string
 
 	switch interface{}(number).(type) {

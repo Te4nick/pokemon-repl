@@ -9,7 +9,7 @@ import (
 	"github.com/chrxn1c/pokemon-repl/pkg/pokectx"
 )
 
-func ExitCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
+func ExitCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 	if len(arg) > 0 {
 		fmt.Println("Detected argument to help command which is not supported")
 		return "", nil
@@ -19,7 +19,7 @@ func ExitCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
 	return "", nil
 }
 
-func MapCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
+func MapCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 	if len(arg) > 0 {
 		fmt.Println("Detected argument to map command which is not supported")
 		return "", nil
@@ -42,7 +42,7 @@ func MapCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
 	return toUserResponse, nil
 }
 
-func MapbCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
+func MapbCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 	if len(arg) > 0 {
 		fmt.Println("Detected argument to map command which is not supported")
 		return "", nil
@@ -65,7 +65,7 @@ func MapbCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
 	return toUserResponse, nil
 }
 
-func ExploreCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
+func ExploreCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 	if len(arg) == 0 {
 		fmt.Println("You need to pass area-name as an argument to explore it.")
 		return "", nil
@@ -93,7 +93,7 @@ func ExploreCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
 	return toUserResponse, nil
 }
 
-func CatchCallback(ctx *pokectx.PokeCTX, arg string) (string, error) {
+func CatchCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 	if len(arg) == 0 {
 		fmt.Println("You need to pass pokemon name as an argument to catch it.")
 		return "", nil

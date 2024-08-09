@@ -1,11 +1,11 @@
 package pokectx
 
-type node struct {
-	children map[string]*node
+type te4nickNode struct {
+	children map[string]*te4nickNode
 	value    string
 }
 
-func (n *node) set(path ...string) {
+func (n *te4nickNode) set(path ...string) {
 	if len(path) == 0 {
 		return
 	}
@@ -17,8 +17,8 @@ func (n *node) set(path ...string) {
 
 	child, ok := n.children[path[0]]
 	if !ok {
-		child = &node{
-			children: make(map[string]*node),
+		child = &te4nickNode{
+			children: make(map[string]*te4nickNode),
 		}
 		n.children[path[0]] = child
 	}
@@ -26,7 +26,7 @@ func (n *node) set(path ...string) {
 	child.set(path[1:]...)
 }
 
-func (n *node) get(path ...string) (string, bool) {
+func (n *te4nickNode) get(path ...string) (string, bool) {
 	if len(path) == 0 {
 		return n.value, true
 	}
