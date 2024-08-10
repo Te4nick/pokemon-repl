@@ -19,12 +19,38 @@ func New(path ...string) *Te4nickPokeCTX {
 	return ctx
 }
 
+// Set last provided string value to the path specified before it
+//
+// ctx.Set("my", "string", "value")
+//
+// ctx.Get("my", "string") // -> "value"
 func (ctx *Te4nickPokeCTX) Set(path ...string) {
 	ctx.root.set(path...)
 }
 
-func (ctx *Te4nickPokeCTX) Get(path ...string) (string, bool) {
+// Alias to Set(path, "")
+func (ctx *Te4nickPokeCTX) SetKey(path ...string) {
+	ctx.root.set(append(path, "")...)
+}
+
+// Get value by specified path
+//
+// ctx.Set("my", "string", "value")
+//
+// ctx.Get("my", "string") // -> "value"
+func (ctx *Te4nickPokeCTX) Get(path ...string) (value string, found bool) {
 	return ctx.root.get(path...)
+}
+
+// Get all available keys after specified path
+//
+// ctx.SetKey("my", "string", "value1")
+//
+// ctx.SetKey("my", "string", "value2")
+//
+// ctx.GetKeys("my", "string") // -> []string{"value1", "value2"}
+func (ctx *Te4nickPokeCTX) GetKeys(path ...string) (value []string, found bool) {
+	return ctx.root.getChildrenNames(path...)
 }
 
 type Ints interface {
@@ -43,7 +69,7 @@ type Number interface {
 	Ints | Uints | Floats
 }
 
-func GetDefaultNum[T Number](ctx *Te4nickPokeCTX, defaultVar T, path ...string) T {
+func GetOrDefaultNum[T Number](ctx *Te4nickPokeCTX, defaultVar T, path ...string) T {
 	s, found := ctx.Get(path...)
 	if !found {
 		return defaultVar

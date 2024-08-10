@@ -26,7 +26,7 @@ func (n *te4nickNode) set(path ...string) {
 	child.set(path[1:]...)
 }
 
-func (n *te4nickNode) get(path ...string) (string, bool) {
+func (n *te4nickNode) get(path ...string) (value string, found bool) {
 	if len(path) == 0 {
 		return n.value, true
 	}
@@ -37,4 +37,20 @@ func (n *te4nickNode) get(path ...string) (string, bool) {
 	}
 
 	return child.get(path[1:]...)
+}
+
+func (n *te4nickNode) getChildrenNames(path ...string) (childrenNames []string, found bool) {
+	if len(path) == 0 {
+		for name := range n.children {
+			childrenNames = append(childrenNames, name)
+		}
+		return
+	}
+
+	child, ok := n.children[path[0]]
+	if !ok {
+		return nil, false
+	}
+
+	return child.getChildrenNames(path[1:]...)
 }

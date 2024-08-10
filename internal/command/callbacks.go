@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -13,8 +14,7 @@ import (
 
 func ExitCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 	if len(arg) > 0 {
-		fmt.Println("Detected argument to help command which is not supported")
-		return "", nil
+		return "Detected argument to exit command which is not supported", nil
 	}
 	fmt.Println("\nIt's been a pleasure to have you onboard! Thanks for using this application")
 	os.Exit(0)
@@ -22,12 +22,11 @@ func ExitCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 }
 
 func MapCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
-	if len(arg) > 0 {
-		fmt.Println("Detected argument to map command which is not supported")
-		return "", nil
+	if len(arg) != 0 {
+		return "Detected argument to map command which is not supported", nil
 	}
 
-	apiOffset := pokectx.GetDefaultNum(ctx, 0, "api", "location", "offset")
+	apiOffset := pokectx.GetOrDefaultNum(ctx, 0, "api", "location", "offset")
 	apiOffset += 20
 	pokectx.SetNum(ctx, apiOffset, "api", "location", "offset")
 	endpoint := fmt.Sprintf("location-area?limit=20&offset=%d", apiOffset)
@@ -45,15 +44,14 @@ func MapCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 }
 
 func MapbCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
-	if len(arg) == 0 {
-		fmt.Println("Detected argument to map command which is not supported")
-		return "", nil
+	if len(arg) != 0 {
+		return "Detected argument to map command which is not supported", nil
 	}
 
-	apiOffset := pokectx.GetDefaultNum(ctx, 0, "api", "location", "offset")
+	apiOffset := pokectx.GetOrDefaultNum(ctx, 0, "api", "location", "offset")
 	apiOffset -= 20
 	pokectx.SetNum(ctx, apiOffset, "api", "location", "offset")
-	endpoint := fmt.Sprintf("location?limit=20&offset=%d", apiOffset)
+	endpoint := fmt.Sprintf("location-area?limit=20&offset=%d", apiOffset)
 
 	locations, err := api.Resource(endpoint)
 	if err != nil {
@@ -69,12 +67,16 @@ func MapbCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 
 func ExploreCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 	if len(arg) == 0 || strings.Contains(arg, " ") {
-		fmt.Println("You need to pass area-name as an argument to explore it.")
-		return "", nil
+		return "You need to pass area-name as an argument to explore it.", nil
 	}
 
 	locationArea, err := api.LocationArea(arg)
 	if err != nil {
+		if errors.Is(err, api.HTTPStatusError{}) {
+			if err.(api.HTTPStatusError).StatusCode == 404 {
+				return "Location Area not found: " + arg, nil
+			}
+		}
 		return "", err
 	}
 
@@ -96,15 +98,19 @@ func ExploreCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 }
 
 func CatchCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
-	if len(arg) == 0 || strings.Contains(arg, " ") {
-		fmt.Println("You need to pass pokemon name as an argument to catch it.")
-		return "", nil
+	if len(strings.Fields(arg)) != 1 {
+		return "This command requires an argument, virtually one.", nil
 	}
 
-	baseChance := 0.3 + rand.Float32()/2.0
+	baseChance := 0.4 + rand.Float32()/2.0
 
 	pokemon, err := api.Pokemon(arg)
 	if err != nil {
+		if errors.Is(err, api.HTTPStatusError{}) {
+			if err.(api.HTTPStatusError).StatusCode == 404 {
+				return "Pokemon not found: " + arg, nil
+			}
+		}
 		return "", err
 	}
 
@@ -112,14 +118,13 @@ func CatchCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 		return "Couldn't catch " + pokemon.Name + "... Try again!", nil
 	}
 
-	ctx.Set("pokedex", pokemon.Name)
+	ctx.SetKey("pokedex", pokemon.Name)
 	return "Congratulations! You've caught " + pokemon.Name + "!", nil
 }
 
 func InspectCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
-	if len(arg) == 0 || strings.Contains(arg, " ") {
-		fmt.Println("This command requires an argument, virtually one.")
-		return "", nil
+	if len(strings.Split(arg, "")) != 1 {
+		return "This command requires an argument, virtually one.", nil
 	}
 
 	caughtPokemons, _ := ctx.Get("pokedex")
@@ -158,7 +163,12 @@ func PokedexCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 		return "", nil
 	}
 
-	caughtPokemons, _ := ctx.Get("pokedex")
+	caughtPokemons, _ := ctx.GetKeys("pokedex")
 
-	return caughtPokemons, nil
+	msg := "Your Pokedex:\n"
+	for _, pokemonName := range caughtPokemons {
+		msg += "  - " + pokemonName + "\n"
+	}
+
+	return msg, nil
 }
