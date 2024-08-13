@@ -1,7 +1,6 @@
 package command
 
 import (
-	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -72,10 +71,8 @@ func ExploreCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 
 	locationArea, err := api.LocationArea(arg)
 	if err != nil {
-		if errors.Is(err, api.HTTPStatusError{}) {
-			if err.(api.HTTPStatusError).StatusCode == 404 {
-				return "Location Area not found: " + arg, nil
-			}
+		if statusErr, ok := err.(api.HTTPStatusError); ok && statusErr.StatusCode == 404 {
+			return "Location Area not found: " + arg, nil
 		}
 		return "", err
 	}
@@ -106,10 +103,8 @@ func CatchCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 
 	pokemon, err := api.Pokemon(arg)
 	if err != nil {
-		if errors.Is(err, api.HTTPStatusError{}) {
-			if err.(api.HTTPStatusError).StatusCode == 404 {
-				return "Pokemon not found: " + arg, nil
-			}
+		if statusErr, ok := err.(api.HTTPStatusError); ok && statusErr.StatusCode == 404 {
+			return "Pokemon not found: " + arg, nil
 		}
 		return "", err
 	}
@@ -123,18 +118,20 @@ func CatchCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
 }
 
 func InspectCallback(ctx *pokectx.Te4nickPokeCTX, arg string) (string, error) {
-	if len(strings.Split(arg, "")) != 1 {
+	if len(strings.Fields(arg)) != 1 {
 		return "This command requires an argument, virtually one.", nil
 	}
 
-	caughtPokemons, _ := ctx.Get("pokedex")
-	if !strings.Contains(caughtPokemons, arg) {
-		return "You have not caught that pokemon\n", nil
+	_, found := ctx.Get("pokedex", arg)
+	if !found {
+		return "You have not caught that pokemon", nil
 	}
 
-	// TODO: inspect pokemon via te4nick structure
 	pokemonInfo, err := api.Pokemon(arg)
 	if err != nil {
+		if statusErr, ok := err.(api.HTTPStatusError); ok && statusErr.StatusCode == 404 {
+			return "Pokemon not found: " + arg, nil
+		}
 		return "Error when making request to the API", err
 	}
 
