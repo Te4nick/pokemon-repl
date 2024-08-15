@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -46,7 +45,7 @@ func Fetch(endpoint string, out interface{}) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New("abnormal response status code")
+		return HTTPStatusError{StatusCode: resp.StatusCode, URL: apiURL}
 	}
 
 	body, err := io.ReadAll(resp.Body)
